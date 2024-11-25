@@ -1,0 +1,32 @@
+---
+Checks: 'clang-diagnostic-*,clang-analyzer-*,modernize-*,-modernize-use-trailing-return-type, readability-identifier-naming'
+WarningsAsErrors: true
+HeaderFilterRegex: ''
+# FormatStyle:     Microsoft
+CheckOptions:
+  - { key: readability-identifier-naming.IgnoreMainLikeFunctions,   value: true  }
+  - { key: readability-identifier-naming.NamespaceCase,             value: lower_case  } # 1.3 NAMESPACE
+  - { key: readability-identifier-naming.ClassCase,                 value: lower_case  } # 1.1 CLASS
+  - { key: readability-identifier-naming.MethodCase,                value: lower_case  } # 1.6 MEMBER FUNCTION, 1.7 STATIC MEMBER FUNCTION
+  - { key: readability-identifier-naming.MemberCase,                value: lower_case  } # 1.8 CLASS MEMBER
+  - { key: readability-identifier-naming.MemberPrefix,              value: m_         } # 1.8 CLASS MEMBER
+  - { key: readability-identifier-naming.StructCase,                value: lower_case  } # 1.2 STRUCT
+  - { key: readability-identifier-naming.GlobalConstantPrefix,      value: k_          } # 1.11 GLOBAL CONSTANT
+  - { key: readability-identifier-naming.GlobalConstantCase,        value: lower_case  } # 1.11 GLOBAL CONSTANT
+  - { key: readability-identifier-naming.EnumCase,                  value: lower_case  } # 1.4 ENUM
+  - { key: readability-identifier-naming.EnumConstantCase,          value: lower_case } # 1.5 ENUM MEMBER
+  - { key: readability-identifier-naming.MacroDefinitionCase,       value: UPPER_CASE } # 1.18 MACROS
+  - { key: readability-identifier-naming.StaticConstantCase,        value: lower_case  } # 1.12 STATIC CONSTANT
+  - { key: readability-identifier-naming.StaticConstantPrefix,      value: s_         } # 1.12 STATIC CONSTANT
+  - { key: readability-identifier-naming.StaticVariableCase,        value: lower_case  } # 1.13 STATIC NON-MEMBER VARIABLE
+  - { key: readability-identifier-naming.StaticVariablePrefix,      value: s_         } # 1.13 STATIC NON-MEMBER VARIABLE
+  - { key: readability-identifier-naming.GlobalVariableCase,        value: lower_case  } # 1.14 GLOBAL VARIABLE
+  - { key: readability-identifier-naming.GlobalVariablePrefix,      value: g_         } # 1.14 GLOBAL VARIABLE
+  - { key: readability-identifier-naming.FunctionCase,              value: lower_case  } # 1.15 OUT-OF-CLASS FUNCTION
+  - { key: readability-identifier-naming.LocalVariableCase,         value: lower_case  } # 1.17 LOCAL VARIABLE
+  - { key: readability-identifier-naming.ParameterCase,             value: lower_case  } # 1.16 FUNCTION ARGUMENT
+  - { key: readability-identifier-naming.ClassMemberCase,           value: lower_case  } # 1.10 STATIC CLASS MEMBER
+  - { key: readability-identifier-naming.ClassMemberPrefix,         value: s_         } # 1.10 STATIC CLASS MEMBER
+
+# Not supported code style entries:
+# - 1.9 STRUCT MEMBER - not supported.
