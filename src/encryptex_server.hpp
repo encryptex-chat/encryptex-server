@@ -6,7 +6,6 @@
 #include <unordered_set>
 
 #include "connection.hpp"
-
 namespace etex
 {
 namespace ba = boost::asio;
@@ -22,7 +21,7 @@ class server
     {
         try
         {
-            start_accept();
+            ba::co_spawn(m_io, start_accept(), ba::detached);
             m_io.run();
         } catch (std::exception& ex)
         {
@@ -30,19 +29,16 @@ class server
         }
     }
 
-    void start_accept()
+    ba::awaitable<void> start_accept()
     {
-        m_socket.emplace(m_io);
-        m_acceptor.async_accept(m_socket.value(), [this](boost::system::error_code ec) {
-            auto connection = connection::create_connection(std::move(m_socket.value()));
+        for (;;)
+        {
+            ba::ip::tcp::socket socket = co_await m_acceptor.async_accept(ba::use_awaitable);
+            auto connection            = connection::create_connection(std::move(socket));
             m_connections.insert(connection);
-            if (!ec)
-            {
-                std::print("Client {} connected\n", connection->name());
-                connection->start();
-            }
-            start_accept();
-        });
+            std::print("Client {} connected\n", connection->name());
+            ba::co_spawn(m_io, connection->start(), ba::detached);
+        }
     }
 
     private:

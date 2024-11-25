@@ -23,7 +23,23 @@ class connection : public std::enable_shared_from_this<connection>
 
     [[nodiscard]] std::string name() const { return m_name; };
 
-    void start() { read(); }
+    ba::awaitable<void> start()
+    {
+        try
+        {
+            for (;;)
+            {
+                std::size_t n =
+                    co_await ba::async_read_until(m_socket, m_buffer, "\n", ba::use_awaitable);
+                std::stringstream msg;
+                msg << std::istream(&m_buffer).rdbuf();
+                std::print("{}\n", msg.str());
+            }
+        } catch (std::exception& e)
+        {
+            std::print("exception {}", e.what());
+        }
+    }
 
     void read()
     {
