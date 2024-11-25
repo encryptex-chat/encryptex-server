@@ -12,8 +12,9 @@ file(GLOB ENCRYPTEX_SERVER_SOURCE ${ENCRYPTEX_SERVER_SOURCE_DIR}/*.cpp)
 
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIR})
+    add_subdirectory("encryptex-common-lib")
     add_executable(${PROJECT_NAME} ${ENCRYPTEX_SERVER_SOURCE})
     target_compile_options(${PROJECT_NAME} PRIVATE "-Wall")
-    target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} spdlog::spdlog)
+    target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} spdlog::spdlog encryptex-common-lib)
 endif()
 

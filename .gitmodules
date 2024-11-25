@@ -1,0 +1,3 @@
+[submodule "encryptex-common-lib"]
+	path = encryptex-common-lib
+	url = git@github.com:encryptex-chat/encryptex-common-lib.git
