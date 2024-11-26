@@ -1,4 +1,5 @@
 #pragma once
+
 #include <boost/asio.hpp>
 #include <cstdint>
 #include <optional>
@@ -6,6 +7,7 @@
 #include <unordered_set>
 
 #include "connection.hpp"
+#include "message.hpp"
 namespace etex
 {
 namespace ba = boost::asio;
@@ -34,10 +36,9 @@ class server
         for (;;)
         {
             ba::ip::tcp::socket socket = co_await m_acceptor.async_accept(ba::use_awaitable);
-            auto connection            = connection::create_connection(std::move(socket));
-            m_connections.insert(connection);
-            std::print("Client {} connected\n", connection->name());
-            ba::co_spawn(m_io, connection->start(), ba::detached);
+            auto conn                  = std::make_shared<connection>(std::move(socket));
+            m_connections.insert(conn);
+            ba::co_spawn(m_io, conn->start(), ba::detached);
         }
     }
 
@@ -45,7 +46,8 @@ class server
     boost::asio::io_context& m_io;
     boost::asio::ip::tcp::acceptor m_acceptor;
     uint32_t m_port;
-    std::unordered_set<connection::ptr> m_connections{};
+    std::unordered_set<connection::conn_ptr> m_connections{};
+    std::vector<message_header> m_msges;
     std::optional<ba::ip::tcp::socket> m_socket;
 };
 
