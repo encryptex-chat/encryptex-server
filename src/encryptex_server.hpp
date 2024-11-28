@@ -3,7 +3,6 @@
 #include <boost/asio.hpp>
 #include <cstdint>
 #include <optional>
-#include <print>
 #include <unordered_set>
 
 #include "connection.hpp"
@@ -15,15 +14,23 @@ namespace ba = boost::asio;
 class server
 {
     public:
-    server(ba::io_context& io, uint32_t port) :
-        m_io{io}, m_acceptor{m_io, ba::ip::tcp::endpoint(ba::ip::tcp::v4(), port)}, m_port{port}
-    {}
+    server(ba::io_context& io) : m_io{io}, m_acceptor{m_io}
+    {
+        ba::ip::tcp::resolver resolver(io);
+        ba::ip::tcp::endpoint ep = *(resolver.resolve(ba::ip::tcp::resolver::query{
+            common::k_server_addr, std::to_string(common::k_server_port)}));
+
+        m_acceptor = ba::ip::tcp::acceptor{m_io, ep};
+    }
 
     void run()
     {
         try
         {
             ba::co_spawn(m_io, start_accept(), ba::detached);
+            spdlog::info("Encryptex server started on address {}:{}",
+                         m_acceptor.local_endpoint().address().to_string(),
+                         m_acceptor.local_endpoint().port());
             m_io.run();
         } catch (std::exception& ex)
         {
@@ -45,9 +52,8 @@ class server
     private:
     boost::asio::io_context& m_io;
     boost::asio::ip::tcp::acceptor m_acceptor;
-    uint32_t m_port;
     std::unordered_set<connection::conn_ptr> m_connections{};
-    std::vector<message_header> m_msges;
+    std::vector<common::message_header> m_msges;
     std::optional<ba::ip::tcp::socket> m_socket;
 };
 
