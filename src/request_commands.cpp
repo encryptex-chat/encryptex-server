@@ -58,6 +58,7 @@ auto connection_to_server_request::parse_header(std::span<uint8_t> hdr)
 }
 
 connection_to_user_request::~connection_to_user_request() = default;
+
 auto connection_to_user_request::execute(std::span<uint8_t> hdr,
                                          std::shared_ptr<connection> conn) -> bool
 {

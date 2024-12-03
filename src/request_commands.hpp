@@ -6,7 +6,7 @@
 #include <span>
 
 // #include "connection.hpp"
-#include "message.hpp"
+#include "common.hpp"
 
 namespace etex
 {
@@ -26,7 +26,7 @@ class request_command
         -> std::expected<common::message_header, common::error_type>;
 };
 
-class errorneous_request : public request_command
+class errorneous_request final : public request_command
 {
     public:
     auto execute(std::span<uint8_t> hdr, std::shared_ptr<connection> conn) -> bool override;
@@ -42,7 +42,7 @@ class connection_to_server_request final : public request_command
         -> std::expected<common::message_header, common::error_type> override;
 };
 
-class connection_to_user_request : public request_command
+class connection_to_user_request final : public request_command
 {
     public:
     auto execute(std::span<uint8_t> hdr, std::shared_ptr<connection> conn) -> bool override;
