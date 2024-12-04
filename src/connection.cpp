@@ -12,26 +12,27 @@ auto connection::start() -> boost::asio::awaitable<void>
 {
     try
     {
-        for (;;)
+        for (common::message msg;;)
         {
             // co_await m_socket.async_receive(ba::buffer(m_buf), ba::use_awaitable);
-            co_await m_socket.async_read_some(ba::buffer(m_buf), ba::use_awaitable);
+            co_await m_socket.async_read_some(ba::buffer(&msg, common::k_message_size),
+                                              ba::use_awaitable);
 
-            std::replace(m_buf.begin(), m_buf.end(), '\n', (char)0);
-            std::replace(m_buf.begin(), m_buf.end(), '\r', (char)0);
-            auto msg_hdr =
-                common::deserialize_msg_hdr(m_buf | std::views::take(common::k_header_size));
+            auto msg_hdr = msg.hdr;
             auto result =
-                details::request_factory(msg_hdr.msg_type)->execute(msg_hdr, shared_from_this());
+                details::request_factory(msg.hdr.msg_type)->execute(msg.hdr, shared_from_this());
             if (result)
             {
-                common::message_header resp_hdr = {
-                    .msg_type = common::message_type::connection_to_server_response,
-                    .src_id   = id(),
-                    .dst_id   = 0};
-                auto msg = common::serialize_msg_hdr(resp_hdr);
+                common::message resp = {
+                    .hdr = {
+                        .msg_type = common::message_type::connection_to_server_response,
+                        .src_id   = id(),
+                        .dst_id   = 0,
+
+                    }};
                 // co_await m_socket.async_send(ba::buffer(msg), ba::use_awaitable);
-                co_await m_socket.async_write_some(ba::buffer(msg), ba::use_awaitable);
+                co_await m_socket.async_write_some(ba::buffer(&resp, common::k_message_size),
+                                                   ba::use_awaitable);
             }
         }
     }
