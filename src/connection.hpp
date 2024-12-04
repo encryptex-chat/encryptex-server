@@ -28,6 +28,8 @@ class connection : public std::enable_shared_from_this<connection>
 
     [[nodiscard]] auto is_registered() const { return m_is_registered; }
 
+    [[nodiscard]] auto id() const { return m_id.first; }
+
     auto set_registered(bool status) { m_is_registered = status; }
 
     auto set_id(uint64_t id) { m_id.first = id; }

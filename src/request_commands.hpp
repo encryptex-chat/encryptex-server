@@ -18,34 +18,29 @@ namespace etex::details
 class request_command
 {
     public:
-    virtual auto execute(std::span<uint8_t> hdr, std::shared_ptr<connection> conn) -> bool = 0;
+    virtual auto execute(common::message_header msg_hdr,
+                         std::shared_ptr<connection> conn) -> bool = 0;
     virtual ~request_command();
-
-    protected:
-    virtual auto parse_header(std::span<uint8_t> hdr)
-        -> std::expected<common::message_header, common::error_type>;
 };
 
 class errorneous_request final : public request_command
 {
     public:
-    auto execute(std::span<uint8_t> hdr, std::shared_ptr<connection> conn) -> bool override;
+    auto execute(common::message_header msg_hdr, std::shared_ptr<connection> conn) -> bool override;
     ~errorneous_request() override;
 };
 
 class connection_to_server_request final : public request_command
 {
     public:
-    auto execute(std::span<uint8_t> hdr, std::shared_ptr<connection> conn) -> bool override;
+    auto execute(common::message_header msg_hdr, std::shared_ptr<connection> conn) -> bool override;
     ~connection_to_server_request() override;
-    auto parse_header(std::span<uint8_t> hdr)
-        -> std::expected<common::message_header, common::error_type> override;
 };
 
 class connection_to_user_request final : public request_command
 {
     public:
-    auto execute(std::span<uint8_t> hdr, std::shared_ptr<connection> conn) -> bool override;
+    auto execute(common::message_header msg_hdr, std::shared_ptr<connection> conn) -> bool override;
     ~connection_to_user_request() override;
 };
 
