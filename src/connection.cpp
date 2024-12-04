@@ -14,6 +14,7 @@ auto connection::start() -> boost::asio::awaitable<void>
     {
         for (;;)
         {
+            // co_await m_socket.async_receive(ba::buffer(m_buf), ba::use_awaitable);
             co_await m_socket.async_read_some(ba::buffer(m_buf), ba::use_awaitable);
 
             std::replace(m_buf.begin(), m_buf.end(), '\n', (char)0);
@@ -29,8 +30,8 @@ auto connection::start() -> boost::asio::awaitable<void>
                     .src_id   = id(),
                     .dst_id   = 0};
                 auto msg = common::serialize_msg_hdr(resp_hdr);
-                co_await m_socket.async_send(ba::buffer(msg), ba::use_awaitable);
-                // co_await m_socket.async_write_some(ba::buffer(msg), ba::use_awaitable);
+                // co_await m_socket.async_send(ba::buffer(msg), ba::use_awaitable);
+                co_await m_socket.async_write_some(ba::buffer(msg), ba::use_awaitable);
             }
         }
     }

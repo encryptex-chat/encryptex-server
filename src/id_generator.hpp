@@ -1,7 +1,4 @@
 #pragma once
-#include <boost/asio/experimental/coro.hpp>
-#include <boost/cobalt/generator.hpp>
-#include <generator>
 
 namespace etex::details
 {
