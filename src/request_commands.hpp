@@ -18,29 +18,32 @@ namespace etex::details
 class request_command
 {
     public:
-    virtual auto execute(common::message_header msg_hdr,
-                         std::shared_ptr<connection> conn) -> bool = 0;
+    virtual auto execute(const common::message& msg, std::shared_ptr<connection> conn)
+        -> std::expected<common::message, common::error_type> = 0;
     virtual ~request_command();
 };
 
 class errorneous_request final : public request_command
 {
     public:
-    auto execute(common::message_header msg_hdr, std::shared_ptr<connection> conn) -> bool override;
+    auto execute(const common::message& msg, std::shared_ptr<connection> conn)
+        -> std::expected<common::message, common::error_type> override;
     ~errorneous_request() override;
 };
 
 class connection_to_server_request final : public request_command
 {
     public:
-    auto execute(common::message_header msg_hdr, std::shared_ptr<connection> conn) -> bool override;
+    auto execute(const common::message& msg, std::shared_ptr<connection> conn)
+        -> std::expected<common::message, common::error_type> override;
     ~connection_to_server_request() override;
 };
 
 class connection_to_user_request final : public request_command
 {
     public:
-    auto execute(common::message_header msg_hdr, std::shared_ptr<connection> conn) -> bool override;
+    auto execute(const common::message& msg, std::shared_ptr<connection> conn)
+        -> std::expected<common::message, common::error_type> override;
     ~connection_to_user_request() override;
 };
 
