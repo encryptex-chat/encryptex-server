@@ -1,4 +1,3 @@
-#include <iostream>
 
 #include "encryptex_server.hpp"
 
