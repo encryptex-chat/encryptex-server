@@ -22,9 +22,10 @@ namespace details
         // NOLINTEND
     };
 }  // namespace details
-using msg_handler_t =
-    std::function<std::expected<common::message, common::error_type>(const common::message&)>;
 namespace ba = boost::asio;
+using msg_handler_t =
+    std::function<ba::awaitable<std::expected<common::message, common::error_type>>(
+        const common::message&)>;
 
 class connection : public std::enable_shared_from_this<connection>
 {

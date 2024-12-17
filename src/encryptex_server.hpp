@@ -21,12 +21,13 @@ class server
 
     auto start_accept() -> ba::awaitable<void>;
 
-    auto message_handler(const common::message& msg, std::shared_ptr<connection> conn)
-        -> std::expected<common::message, common::error_type>;
+    auto message_handler(const common::message& msg)
+        -> ba::awaitable<std::expected<common::message, common::error_type>>;
+
+    auto find_client(uint64_t client_id)
+        -> std::expected<std::shared_ptr<connection>, common::error_type> const;
 
     private:
-    auto find_client(uint64_t client_id)
-        -> std::expected<details::client_identificator, common::error_type>;
     boost::asio::io_context& m_io;
     boost::asio::ip::tcp::acceptor m_acceptor;
     std::unordered_set<std::shared_ptr<connection>> m_connections{};

@@ -36,35 +36,23 @@ void server::run()
 }
 
 auto server::find_client(uint64_t client_id)
-    -> std::expected<details::client_identificator, common::error_type>
+    -> std::expected<std::shared_ptr<connection>, common::error_type> const
 {
     if (auto found_id =
             std::ranges::find_if(m_connections, [client_id](const std::shared_ptr<connection>& conn)
                                  { return client_id == conn->id(); });
         found_id != m_connections.end())
     {
-        return (*found_id)->full_id();
+        return *found_id;
     }
     return std::unexpected{common::error_type::client_not_found};
 }
 
-auto server::message_handler(const common::message& msg, std::shared_ptr<connection> conn)
-    -> std::expected<common::message, common::error_type>
+auto server::message_handler(const common::message& msg)
+    -> ba::awaitable<std::expected<common::message, common::error_type>>
 {
     spdlog::info("Request {}", magic_enum::enum_name(msg.hdr.msg_type));
-    auto request_handler = details::request_factory(msg.hdr.msg_type);
-    if (msg.hdr.msg_type == common::message_type::user_to_user_request)
-    {
-        if (auto client = find_client(msg.hdr.dst_id); client.has_value())
-        {
-            request_handler->set_user(client->id);
-        }
-        else
-        {
-            spdlog::error("Error: {}", magic_enum::enum_name(client.error()));
-        }
-    }
-    return request_handler->execute(msg, conn);
+    co_return co_await details::request_factory(msg.hdr.msg_type)->execute(msg, *this);
 }
 
 auto server::start_accept() -> ba::awaitable<void>
@@ -73,11 +61,10 @@ auto server::start_accept() -> ba::awaitable<void>
     {
         ba::ip::tcp::socket socket = co_await m_acceptor.async_accept(ba::use_awaitable);
         auto conn                  = std::make_shared<connection>(std::move(socket));
-        std::weak_ptr<connection> weak_conn{conn};
-        auto msg_h = [this, weak_conn](const common::message& msg)
-            -> std::expected<common::message, common::error_type>
+        auto msg_h                 = [this](const common::message& msg)
+            -> ba::awaitable<std::expected<common::message, common::error_type>>
         {
-            return message_handler(msg, weak_conn.lock());
+            co_return co_await message_handler(msg);
         };
 
         m_connections.insert(conn);
