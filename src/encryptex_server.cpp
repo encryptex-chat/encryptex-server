@@ -48,6 +48,16 @@ auto server::find_client(uint64_t client_id)
     return std::unexpected{common::error_type::client_not_found};
 }
 
+auto server::remove_expired_clients() -> void
+{
+    auto removed = std::erase_if(
+        m_connections, [](const std::shared_ptr<connection>& conn) { return conn->is_expired(); });
+    if (removed > 0)
+    {
+        spdlog::info("Removed from server table {} expired client", removed);
+    }
+}
+
 auto server::message_handler(const common::message& msg)
     -> ba::awaitable<std::expected<common::message, common::error_type>>
 {
@@ -69,6 +79,7 @@ auto server::start_accept() -> ba::awaitable<void>
 
         m_connections.insert(conn);
         ba::co_spawn(m_io, conn->start(std::move(msg_h)), ba::detached);
+        remove_expired_clients();
     }
 }
 

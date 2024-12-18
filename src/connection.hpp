@@ -40,6 +40,8 @@ class connection : public std::enable_shared_from_this<connection>
 
     [[nodiscard]] auto is_registered() const { return m_is_registered; }
 
+    [[nodiscard]] auto is_expired() const { return m_is_expired; }
+
     [[nodiscard]] auto id() const { return m_id.id; }
 
     auto set_full_id(details::client_identificator c_id) { m_id = c_id; }
@@ -51,10 +53,13 @@ class connection : public std::enable_shared_from_this<connection>
 
     auto start(msg_handler_t&& income_message_handler) -> boost::asio::awaitable<void>;
 
+    auto on_error(std::optional<std::string_view> exc_msg = std::nullopt) -> void;
+
     private:
     ba::ip::tcp::socket m_socket;
     details::client_identificator m_id;
     bool m_is_registered{false};
+    bool m_is_expired{false};
     msg_handler_t m_on_message;
 };
 

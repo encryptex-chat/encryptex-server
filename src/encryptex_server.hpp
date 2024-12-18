@@ -27,6 +27,8 @@ class server
     auto find_client(uint64_t client_id)
         -> std::expected<std::shared_ptr<connection>, common::error_type> const;
 
+    auto remove_expired_clients() -> void;
+
     private:
     boost::asio::io_context& m_io;
     boost::asio::ip::tcp::acceptor m_acceptor;
