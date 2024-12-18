@@ -3,12 +3,12 @@
 #include <spdlog/spdlog.h>
 
 #include <boost/asio.hpp>
+#include <expected>
 #include <functional>
 #include <memory>
 #include <string>
 
 #include "common.hpp"
-#include "request_commands.hpp"
 
 namespace etex
 {
