@@ -62,7 +62,7 @@ auto server::message_handler(const common::message& msg)
     -> ba::awaitable<std::expected<common::message, common::error_type>>
 {
     spdlog::info("Request {}", magic_enum::enum_name(msg.hdr.msg_type));
-    co_return co_await details::request_factory(msg.hdr.msg_type)->execute(msg, *this);
+    co_return co_await details::request_factory(msg.hdr.msg_type)->process(msg, *this);
 }
 
 auto server::start_accept() -> ba::awaitable<void>
@@ -76,7 +76,7 @@ auto server::start_accept() -> ba::awaitable<void>
         {
             co_return co_await message_handler(msg);
         };
-
+        spdlog::info("ID in start_accept: {}", conn->id());
         m_connections.insert(conn);
         ba::co_spawn(m_io, conn->start(std::move(msg_h)), ba::detached);
         remove_expired_clients();

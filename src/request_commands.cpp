@@ -15,7 +15,7 @@ request_command::~request_command() = default;
 
 errorneous_request::~errorneous_request() = default;
 
-auto errorneous_request::execute(const common::message& msg, server& serv)
+auto errorneous_request::process(const common::message& msg, server& serv)
     -> ba::awaitable<std::expected<common::message, common::error_type>>
 {
     spdlog::error("Errorneous request happened");
@@ -24,7 +24,7 @@ auto errorneous_request::execute(const common::message& msg, server& serv)
 
 connection_to_server_request::~connection_to_server_request() = default;
 
-auto connection_to_server_request::execute(const common::message& msg, server& serv)
+auto connection_to_server_request::process(const common::message& msg, server& serv)
     -> ba::awaitable<std::expected<common::message, common::error_type>>
 {
     if (auto found = serv.find_client(msg.hdr.src_id); found.has_value())
@@ -52,7 +52,7 @@ auto connection_to_server_request::execute(const common::message& msg, server& s
 
 connection_to_user_request::~connection_to_user_request() = default;
 
-auto connection_to_user_request::execute(const common::message& msg, server& serv)
+auto connection_to_user_request::process(const common::message& msg, server& serv)
     -> ba::awaitable<std::expected<common::message, common::error_type>>
 {
     if (auto found = serv.find_client(msg.hdr.dst_id); found.has_value())
@@ -62,10 +62,13 @@ auto connection_to_user_request::execute(const common::message& msg, server& ser
         {
             spdlog::info("Client {} request to connect to client {}", msg.hdr.src_id,
                          msg.hdr.dst_id);
-            common::message msg_to_client{};
+            common::message msg_to_client{msg};
+            msg_to_client.hdr.msg_type = common::message_type::user_to_user_request;
             co_await boost::asio::async_write(conn->socket(),
                                               ba::buffer(&msg_to_client, common::k_message_size),
                                               ba::use_awaitable);
+
+            // TODO: add process for respone of user_to_user request
             co_return common::message{
                 .hdr{.msg_type = common::message_type::connection_to_user_response,
                      .src_id   = msg.hdr.src_id,

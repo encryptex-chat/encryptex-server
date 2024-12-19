@@ -19,7 +19,7 @@ namespace ba = boost::asio;
 class request_command
 {
     public:
-    virtual auto execute(const common::message& msg, server& serv)
+    virtual auto process(const common::message& msg, server& serv)
         -> ba::awaitable<std::expected<common::message, common::error_type>> = 0;
     virtual ~request_command();
 };
@@ -27,7 +27,7 @@ class request_command
 class errorneous_request final : public request_command
 {
     public:
-    auto execute(const common::message& msg, server& serv)
+    auto process(const common::message& msg, server& serv)
         -> ba::awaitable<std::expected<common::message, common::error_type>> override;
     ~errorneous_request() override;
 };
@@ -35,7 +35,7 @@ class errorneous_request final : public request_command
 class connection_to_server_request final : public request_command
 {
     public:
-    auto execute(const common::message& msg, server& serv)
+    auto process(const common::message& msg, server& serv)
         -> ba::awaitable<std::expected<common::message, common::error_type>> override;
     ~connection_to_server_request() override;
 };
@@ -43,7 +43,7 @@ class connection_to_server_request final : public request_command
 class connection_to_user_request final : public request_command
 {
     public:
-    auto execute(const common::message& msg, server& serv)
+    auto process(const common::message& msg, server& serv)
         -> ba::awaitable<std::expected<common::message, common::error_type>> override;
     ~connection_to_user_request() override;
 };
