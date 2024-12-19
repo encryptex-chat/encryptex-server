@@ -1,70 +1,66 @@
 #pragma once
 
+#include <spdlog/spdlog.h>
+
 #include <boost/asio.hpp>
-#include <chrono>
-#include <istream>
+#include <expected>
+#include <functional>
 #include <memory>
-#include <print>
-#include <thread>
+#include <string>
+
+#include "common.hpp"
 
 namespace etex
 {
+namespace details
+{
+    struct client_identificator
+    {
+        // NOLINTBEGIN
+        uint64_t id;
+        std::string ip;
+        // NOLINTEND
+    };
+}  // namespace details
 namespace ba = boost::asio;
+using msg_handler_t =
+    std::function<ba::awaitable<std::expected<common::message, common::error_type>>(
+        const common::message&)>;
+
 class connection : public std::enable_shared_from_this<connection>
 {
     public:
-    using ptr = std::shared_ptr<connection>;
-    static std::shared_ptr<connection> create_connection(boost::asio::ip::tcp::socket&& socket)
-    {
-        return ptr(new connection(std::move(socket)));
-    }
+    explicit connection(boost::asio::ip::tcp::socket&& socket);
 
     boost::asio::ip::tcp::socket& socket() { return m_socket; };
 
-    [[nodiscard]] std::string name() const { return m_name; };
+    [[nodiscard]] auto ip() const { return m_id.ip; };
 
-    ba::awaitable<void> start()
-    {
-        try
-        {
-            for (;;)
-            {
-                std::size_t n =
-                    co_await ba::async_read_until(m_socket, m_buffer, "\n", ba::use_awaitable);
-                std::stringstream msg;
-                msg << std::istream(&m_buffer).rdbuf();
-                std::print("{}\n", msg.str());
-            }
-        } catch (std::exception& e)
-        {
-            std::print("exception {}", e.what());
-        }
-    }
+    auto set_ip(const std::string& ip) { m_id.ip = ip; }
 
-    void read()
-    {
-        ba::async_read_until(
-            m_socket, m_buffer, "\n",
-            [self = shared_from_this()](boost::system::error_code ec, std::size_t bytes) {
-                std::stringstream msg;
-                msg << std::istream(&(self->m_buffer)).rdbuf();
-                std::print("{}\n", msg.str());
-                self->read();
-            });
-    }
+    [[nodiscard]] auto is_registered() const { return m_is_registered; }
+
+    [[nodiscard]] auto is_expired() const { return m_is_expired; }
+
+    [[nodiscard]] auto id() const { return m_id.id; }
+
+    auto set_full_id(details::client_identificator c_id) { m_id = c_id; }
+    [[nodiscard]] auto full_id() const { return m_id; }
+
+    auto set_registered(bool status) { m_is_registered = status; }
+
+    auto set_id(uint64_t id) { m_id.id = id; }
+
+    auto start(msg_handler_t&& income_message_handler) -> boost::asio::awaitable<void>;
+
+    auto on_error(std::optional<std::string_view> exc_msg = std::nullopt) -> void;
 
     private:
-    explicit connection(boost::asio::ip::tcp::socket&& socket) :
-        m_socket{std::move(socket)}, m_name{}
-    {
-        std::stringstream name;
-        name << m_socket.remote_endpoint();
-        m_name = name.str();
-    }
     ba::ip::tcp::socket m_socket;
-    std::string m_name;
-    ba::streambuf m_buffer{1000};
-    // will be defined structure for user
+    details::client_identificator m_id;
+    bool m_is_registered{false};
+    bool m_is_expired{false};
+    msg_handler_t m_on_message;
 };
 
 }  // namespace etex
