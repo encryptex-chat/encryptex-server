@@ -71,14 +71,6 @@ auto connection_to_user_request::process(const common::message& msg, server& ser
                                               ba::buffer(&msg_to_client, common::k_message_size),
                                               ba::use_awaitable);
         }
-        else
-        {
-            co_return common::message{
-                .hdr  = {.msg_type = common::message_type::connection_to_user_bad_response,
-                         .src_id   = msg.hdr.src_id,
-                         .dst_id   = msg.hdr.dst_id},
-                .data = {}};
-        }
     }
     co_return common::message{};
     // co_return std::unexpected{common::error_type::unknown};
