@@ -1,5 +1,7 @@
 #include "connection.hpp"
 
+#include "common.hpp"
+
 namespace etex
 {
 connection::connection(boost::asio::ip::tcp::socket&& socket) : m_socket{std::move(socket)} {}
@@ -31,12 +33,16 @@ auto connection::start(msg_handler_t&& income_message_handler) -> boost::asio::a
 
             auto response = co_await m_on_message(msg);
 
-            co_await m_socket.async_write_some(ba::buffer(&response, common::k_message_size),
-                                               ba::redirect_error(ba::use_awaitable, ec));
-            if (ec)
+            // TODO: remove
+            if (response->hdr.msg_type != common::message_type::unknown_message_type)
             {
-                on_error();
-                break;
+                co_await m_socket.async_write_some(ba::buffer(&response, common::k_message_size),
+                                                   ba::redirect_error(ba::use_awaitable, ec));
+                if (ec)
+                {
+                    on_error();
+                    break;
+                }
             }
         }
     }
