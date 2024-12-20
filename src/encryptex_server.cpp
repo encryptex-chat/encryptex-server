@@ -58,6 +58,15 @@ auto server::remove_expired_clients() -> void
     }
 }
 
+auto server::execute_db(std::string_view prompt) -> pqxx::result
+{
+    pqxx::connection cx{getenv("ENCRYPTEX_DB")};
+    pqxx::work tx{cx};
+    auto result = tx.exec(prompt);
+    tx.commit();
+    return result;
+}
+
 auto server::message_handler(const common::message& msg)
     -> ba::awaitable<std::expected<common::message, common::error_type>>
 {

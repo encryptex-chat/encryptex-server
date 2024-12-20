@@ -3,6 +3,7 @@
 #include <boost/asio.hpp>
 #include <expected>
 #include <optional>
+#include <pqxx/pqxx>
 #include <unordered_set>
 
 #include "common.hpp"
@@ -26,6 +27,8 @@ class server
 
     auto find_client(uint64_t client_id)
         -> std::expected<std::shared_ptr<connection>, common::error_type> const;
+
+    auto execute_db(std::string_view prompt) -> pqxx::result;
 
     auto remove_expired_clients() -> void;
 

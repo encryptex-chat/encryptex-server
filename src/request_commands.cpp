@@ -7,6 +7,8 @@
 #include "common.hpp"
 #include "encryptex_server.hpp"
 #include "id_generator.hpp"
+// TODO:
+//  #include "pqxx_coro.hpp"
 
 namespace etex::details
 {
@@ -27,6 +29,19 @@ connection_to_server_request::~connection_to_server_request() = default;
 auto connection_to_server_request::process(const common::message& msg, server& serv)
     -> ba::awaitable<std::expected<common::message, common::error_type>>
 {
+    // TODO:
+    // auto result = co_await execute_db("select * from users", ba::use_awaitable);
+    // spdlog::info("size: {}", result.size());
+    if (msg.hdr.src_id != 0)
+    {
+        auto prompt = std::format("select * from users where identifier = {}", msg.hdr.src_id);
+        auto res    = serv.execute_db(prompt.c_str());
+        if (res.size() > 0)
+        {
+            spdlog::info("Client {} already exist; add to the table",
+                         res.begin()["identifier"].as<int>());
+        }
+    }
     if (auto found = serv.find_client(msg.hdr.src_id); found.has_value())
     {
         auto conn = found.value();
